@@ -19,8 +19,8 @@ var getNowTime = function ()
 var server = require('http').createServer();
 var sockIds = [];
 
-server.listen(8000, function(){
-	console.log('Server Running at http://localhost:8000');
+server.listen(8001, function(){
+	console.log('Server Running at port 8001');
 });
 
 server.on('request', function(req, res){ 
