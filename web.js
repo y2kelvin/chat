@@ -90,22 +90,16 @@ io.sockets.on( 'connection', function(socket){
 	  var prtDate = getNowTime();
 	  
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
-	 
-	  delete sockIds[socket.id];
-	  
-	  console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
-	  
-	  /*
-	  for(var index in sockIds){		  
-		 console.log(' array: ' + index + ': ' + sockIds[index] +'\n' );
-	  }	
-	  */
 	  
 	  io.sockets.in( socket.room ).emit('message', {
 		id : 'server',
 		message : sockIds[socket.id]+'님이 퇴장하셨습니다.',
 		date : prtDate
 	  });
+	  
+	  delete sockIds[socket.id];	  
+	  console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
+	  
 	});
 });
 
