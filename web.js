@@ -1,8 +1,9 @@
-// JavaScript Document
+// Chat Server 1.0.0
 
 var fs = require('fs');
 var ejs = require('ejs');
 var url = require('url');
+var sys = require('sys');
 var getNowTime = function ()
 {			
 	var day=new Date(); 
@@ -17,7 +18,7 @@ var getNowTime = function ()
 }
 
 var server = require('http').createServer();
-var sockIds = [];
+var sockIds = {};
 
 server.listen(8001, function(){
 	console.log('Server Running at port 8001');
@@ -32,7 +33,7 @@ server.on('request', function(req, res){
 		var userId = query.id;
 		var name = query.name;
 		var room = query.room;
-		console.log('request Call '+userId + '  '+ name+' '+room);	
+		console.log('request Call '+userId + '  name: '+ name+' room: '+room);	
 	}
 	else
 	{
@@ -42,7 +43,8 @@ server.on('request', function(req, res){
 		console.log('request Call empty');	
 	}
 	
-	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat.html', 'utf-8', function(error, data){
+	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat.html', 'utf-8', function(error, data){ // cafe24
+	//fs.readFile( './chat.html', 'utf-8', function(error, data){		
 		res.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		res.end( ejs.render(data, {
 			id: userId,
@@ -63,7 +65,7 @@ io.sockets.on( 'connection', function(socket){
 		var prtDate = getNowTime();
 		
 		/*test*/console.log(socket.id + ' join> '+data.name+'님이 ' + data.room+'방에 입장하셨습니다.'); // data : 사용자가 입력한 방이름
-		sockIds[socket.id] = data.name;
+		sockIds[socket.id] = data.name;		
 		
 		socket.join(data.room); //사용자가 입력한 방에 socket을 참여시킨다.
 		socket.room = data.room; //'room' 속성에 사용자가 입력한 방이름을 저장한다.
@@ -86,7 +88,18 @@ io.sockets.on( 'connection', function(socket){
 	==============================*/
 	socket.on('disconnect', function(data){  
 	  var prtDate = getNowTime();
-	  console.log( socket.id+' disconnect event: ' +prtDate);
+	  
+	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
+	 
+	  delete sockIds[socket.id];
+	  
+	  console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
+	  
+	  /*
+	  for(var index in sockIds){		  
+		 console.log(' array: ' + index + ': ' + sockIds[index] +'\n' );
+	  }	
+	  */
 	  
 	  io.sockets.in( socket.room ).emit('message', {
 		id : 'server',
