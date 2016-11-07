@@ -42,7 +42,7 @@ server.on('request', function(req, res){
 		console.log('request Call empty');	
 	}
 	
-	fs.readFile( 'chat.html', 'utf-8', function(error, data){
+	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat.html', 'utf-8', function(error, data){
 		res.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		res.end( ejs.render(data, {
 			id: userId,
