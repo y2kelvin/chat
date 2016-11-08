@@ -58,7 +58,7 @@ io.sockets.on( 'connection', function(socket){
 		socket.join(data.room); 			//사용자가 입력한 방에 socket을 참여시킨다.
 		socket.room = data.room; 		//'room' 속성에 사용자가 입력한 방이름을 저장한다.
 		io.sockets.in( socket.room ).emit('message', {
-			id : 'server',
+			id : 'MiMO',
 			message : data.name+'님이 ' + data.room+'방에 입장하셨습니다.',
 			date : prtDate
 		  });
@@ -80,7 +80,7 @@ io.sockets.on( 'connection', function(socket){
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
 	  
 	  io.sockets.in( socket.room ).emit('message', {
-		id : 'server',
+		id : 'MiMO',
 		message : sockIds[socket.id]+'님이 퇴장하셨습니다.',
 		date : prtDate
 	  });

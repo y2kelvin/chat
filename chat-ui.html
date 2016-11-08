@@ -25,6 +25,9 @@
 			-webkit-box-sizing:border-box;
 			box-sizing:border-box;
 		}
+		small{
+			color: #aaa;
+		}
 		#inp-bar{
 			position:absolute;
 			left:0;
@@ -69,7 +72,7 @@
 				room: room 
 			});
 			socket.on( 'message', function(data){
-				var output = '<p>[' + data.id +'] ' + data.message + ' (' + data.date + ')</p>';
+				var output = '<p>[' + data.id +'] ' + data.message + ' <small>(' + data.date + ')</small></p>';
 				$( output ).appendTo('#content');
 				$('#content').scrollTop($('#content')[0].scrollHeight);	
 			});	
