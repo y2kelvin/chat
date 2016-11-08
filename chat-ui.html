@@ -1,8 +1,12 @@
 <!DOCTYPE HTML>
 <html lang="ko">
 <head>
-  	<title>chat client</title>
+  	<title>Chat Client</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/mobile/som/css/base.css">
+    <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/plugins/fontium/css/fontium.css"> 
+    
     <style>
 		input{
 			height:30px;
@@ -17,10 +21,12 @@
 			overflow-y:scroll;
 			-webkit-overflow-scrolling: touch;
 			overflow-scrolling: touch;
+			padding:10px;
+			box-sizing:border-box;
 		}
 	</style>
   	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 	
-	<script src="/socket.io/socket.io.js"></script>
+	<script src="/socket.io/socket.io.js"></script>   
 
 	<script type="text/javascript">
 		var getNowTime = function ()
@@ -96,18 +102,27 @@
                }                   
           });
          
-
-	
 	</script>
 </head>
 <body>
-<h1><%= room %></h1>
-<div id="content"></div>
-<hr>
-<input type="hidden" id="uid" value="<%=name%>" />
-<input type="text" id="msg" autofocus />
-<input type="button" id="button" value="메세지" />
-<input type="button" id="button2" value="퇴장" />
+<div class="wrapper">	
+
+	<div class="header"><div class="back-icon"></div><h1><%= room %></h1></div>
+
+	<div id="content"></div>
+
+	<div style="padding:10px 0 0 5px;">
+    <input type="hidden" id="uid" value="<%=name%>" />
+    <table width="100%" border="0">
+    	<tr>
+        	<td><input type="text" id="msg" autofocus style="width:100%" /></td>
+            <td width="57"><input type="button" id="button" value="메세지" class="button-sm" />
+            <!--<input type="button" id="button2" value="퇴장" class="button-sm" />--></td>
+        </tr>
+    </table>
+    </div>
+    
+</div>
 
 </body>
 </html>
