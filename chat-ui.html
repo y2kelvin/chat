@@ -25,6 +25,9 @@
 			-webkit-box-sizing:border-box;
 			box-sizing:border-box;
 		}
+		p{
+			line-height:1.54em;
+		}
 		small{
 			color: #aaa;
 		}
@@ -58,6 +61,7 @@
 			return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
 		}
 	
+		var socket;
 		window.onload = function(){
 	
 			// 소켓
@@ -65,31 +69,31 @@
 			var userId = '<%= id %>';
 			var name = '<%= name %>';
 			
-			var socket = io.connect(); //소켓서버 연결
+			socket = io.connect(); //소켓서버 연결
+						
+			// 조인			
 			socket.emit( 'join', {
-				id: userId,
+				id: userId,				
 				name: name,
 				room: room 
 			});
+			
+			// 메세지 수신
 			socket.on( 'message', function(data){
-				var output = '<p>[' + data.id +'] ' + data.message + ' <small>(' + data.date + ')</small></p>';
+				var output = '<p><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small></p>';
 				$( output ).appendTo('#content');
 				$('#content').scrollTop($('#content')[0].scrollHeight);	
 			});	
 			
-			$('#button').click(function(){
-				var uid = $('#uid').val();
-				var msg = $('#msg').val();
+			// 서버가 끊어짐			
+			socket.on( 'disconnect', function(data){  
 				
-				//서버측 'message' 이벤트를 호출한다. 이때 msg 전달
-				var prtDate = getNowTime();
-				socket.emit('message', {
-					id : uid,
-					message : msg,
-					date : prtDate
-				}); //서버측 'message' 이벤트를 호출한다. 이때 msg 전달
+				socket.disconnect();
 				
-				var msg = $('#msg').val(''); //메세지 내용 초기화
+				var prtDate = getNowTime();  
+				var output = '<p>서버로부터 연결이 끊어졌습니다. <small>(' + prtDate + ')</small></p>';
+				$( output ).appendTo('#content');
+				$('#content').scrollTop($('#content')[0].scrollHeight);	
 			});
 		};
 		
@@ -104,6 +108,32 @@
 			
 			// UI
 			heightAlign();
+			
+			// 메세지 전송
+			$('#button').click(function(){
+				
+				if( !$("#msg").val() || $('#msg').val().replace(/\s/g,"").length == 0 )
+				{
+					//console.log('공백');
+					$("#msg").val('')
+					return;
+				}
+				
+				var uid = $('#uid').val();
+				var name = $('#name').val();
+				var msg = $('#msg').val();
+				
+				//서버측 'message' 이벤트를 호출한다. 이때 msg 전달
+				var prtDate = getNowTime();
+				socket.emit('message', {
+					id : uid,
+					name : name,
+					message : msg,
+					date : prtDate
+				}); //서버측 'message' 이벤트를 호출한다. 이때 msg 전달
+				
+				var msg = $('#msg').val(''); //메세지 내용 초기화
+			});
 			
 			// 퇴장 
 			$('#button2').click(function(){				
@@ -149,7 +179,8 @@
     <footer style="height:50px;"></footer>
 
 	<div id="inp-bar">
-        <input type="hidden" id="uid" value="<%=name%>" />
+        <input type="hidden" id="uid" value="<%=id%>" />
+        <input type="hidden" id="name" value="<%=name%>" />
         <table width="100%" border="0" cellpadding="0" cellspacing="0">
             <tr>
                 <td><input type="text" id="msg" autofocus style="width:100%" /></td>
