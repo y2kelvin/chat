@@ -30,8 +30,8 @@ app.get( '/:code/:id/:name' , function(request, response) {
 	
 	console.log('express get room: '+room+' userId: ' + userId + ' name: '+ name );		
 	
-	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui.html', 'utf-8', function(error, data){ // cafe24
-	//fs.readFile( './chat-ui.html', 'utf-8', function(error, data){		
+	//fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui.html', 'utf-8', function(error, data){ // cafe24
+	fs.readFile( './chat-ui.html', 'utf-8', function(error, data){		
 		response.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		response.end( ejs.render(data, {
 			room: room,
@@ -80,7 +80,7 @@ io.sockets.on( 'connection', function(socket){
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
 	  
 	  io.sockets.in( socket.room ).emit('message', {
-		id : 'MiMO',
+		name : 'MiMO',
 		message : sockIds[socket.id]+'님이 퇴장하셨습니다.',
 		date : prtDate
 	  });
