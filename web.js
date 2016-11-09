@@ -88,7 +88,7 @@ io.sockets.on( 'connection', function(socket){
 	  var prtDate = fns.getNowTime();
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
 	  
-	  if( typeof (sockIds[socket.id].id) !== 'undefined')
+	  if( typeof sockIds[socket.id].id != 'undefined')
 	  {
 		  var id = sockIds[socket.id].id;
 		  var name = sockIds[socket.id].name;
