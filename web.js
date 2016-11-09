@@ -84,24 +84,28 @@ io.sockets.on( 'connection', function(socket){
 	/* 퇴장
 	==============================*/
 	socket.on('disconnect', function(data){  
-	  var prtDate = fns.getNowTime();
 	  
+	  var prtDate = fns.getNowTime();
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
 	  
-	  var id = sockIds[socket.id].id;
-	  var name = sockIds[socket.id].name;
-	  	  
-	  var message = name+'님이 퇴장하셨습니다.';  
-	  io.sockets.in( socket.room ).emit('message', {
-		name : 'MiMO',
-		message : message,
-		date : prtDate
-	  });
-	  	  
-	  console.log('disconnect> ' + message);	  
-	  fns.dbInsert(socket.room, id, name, message); // database
+	  if( typeof (sockIds[socket.id].id) !== 'undefined')
+	  {
+		  var id = sockIds[socket.id].id;
+		  var name = sockIds[socket.id].name;
+			  
+		  var message = name+'님이 퇴장하셨습니다.';  
+		  io.sockets.in( socket.room ).emit('message', {
+			name : 'MiMO',
+			message : message,
+			date : prtDate
+		  });
+			  
+		  console.log('disconnect> ' + message);	  
+		  fns.dbInsert(socket.room, id, name, message); // database
+		  
+		  delete sockIds[socket.id];	  
+		  //console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
+	  }
 	  
-	  delete sockIds[socket.id];	  
-	  //console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
 	});
 });
