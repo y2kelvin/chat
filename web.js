@@ -53,7 +53,8 @@ io.sockets.on( 'connection', function(socket){
 	socket.on( 'join', function(data){ //가입
 		
 		var prtDate = fns.getNowTime();				
-		sockIds[socket.id] = [data.id, data.name];				
+		//sockIds[socket.id] = [data.id, data.name];				
+		sockIds[socket.id] = data.name;
 		socket.join(data.room); 			//사용자가 입력한 방에 socket을 참여시킨다.
 		socket.room = data.room; 		//'room' 속성에 사용자가 입력한 방이름을 저장한다.
 		var message = data.name+'님이 ' + data.room+'방에 입장하셨습니다.';
@@ -84,17 +85,17 @@ io.sockets.on( 'connection', function(socket){
 	  
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
 	  
-	  var id = sockIds[socket.id][0];
-	  var name = sockIds[socket.id][1];
-	  var message = name+'님이 퇴장하셨습니다.';  
+	  //var id = sockIds[socket.id][0];
+	  //var name = sockIds[socket.id][1];
+	  //var message = name+'님이 퇴장하셨습니다.';  
 	  io.sockets.in( socket.room ).emit('message', {
 		name : 'MiMO',
 		message : message,
 		date : prtDate
 	  });
 	  	  
-	  console.log('disconnect> ' + message);	  
-	  fns.dbInsert(socket.room, id, name, message); // database
+	  //console.log('disconnect> ' + message);	  
+	  //fns.dbInsert(socket.room, id, name, message); // database
 	  
 	  delete sockIds[socket.id];	  
 	  //console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
