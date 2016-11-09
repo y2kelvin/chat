@@ -57,6 +57,7 @@ io.sockets.on( 'connection', function(socket){
 		sockIds[socket.id] = [];
 		sockIds[socket.id].id = data.id;
 		sockIds[socket.id].name = data.name;
+		console.log( '소컷ID: ' + socket.id+' JOIN요청등록 ' + prtDate +'\n');
 		
 		socket.join(data.room); 			//사용자가 입력한 방에 socket을 참여시킨다.
 		socket.room = data.room; 		//'room' 속성에 사용자가 입력한 방이름을 저장한다.
@@ -86,9 +87,9 @@ io.sockets.on( 'connection', function(socket){
 	socket.on('disconnect', function(data){  
 	  
 	  var prtDate = fns.getNowTime();
-	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
+	  console.log( '소컷ID: ' + socket.id+' disconnect event At ' + prtDate +'\n');
 	  
-	  if( typeof sockIds[socket.id].id != 'undefined')
+	  if( typeof sockIds[socket.id] != 'undefined' && typeof sockIds[socket.id].id != 'undefined' )
 	  {
 		  var id = sockIds[socket.id].id;
 		  var name = sockIds[socket.id].name;
@@ -106,6 +107,11 @@ io.sockets.on( 'connection', function(socket){
 		  delete sockIds[socket.id];	  
 		  //console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
 	  }
+	  else
+	  {
+		  console.log( '소컷ID: ' + socket.id+' 등록되지 않은 소켓 끊어짐 ' + prtDate +'\n');
+	  }
+	  
 	  
 	});
 });
