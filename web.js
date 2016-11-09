@@ -48,6 +48,9 @@ app.get( '/:code/:id/:name' , function(request, response) {
 var io = require('socket.io').listen(http);
 io.sockets.on( 'connection', function(socket){
 	
+	var prtDate = fns.getNowTime();
+	console.log( '소컷ID: ' + socket.id+' 소켓 연결 ' + prtDate +'\n');
+	
 	/* 가입
 	==============================*/
 	socket.on( 'join', function(data){ //가입
