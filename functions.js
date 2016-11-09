@@ -27,7 +27,8 @@ var db_config = {
 };
 // cafe24
 var cafe24_config = {
-	 host     : 'localhost',
+	 host     : '10.0.0.1',
+	 port : 3306,
      user : 'mimochat',
      password : 'mimodbnoemi24',
      database : 'mimochat'
