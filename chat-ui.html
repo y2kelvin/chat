@@ -94,6 +94,15 @@
 				var output = '<p>서버로부터 연결이 끊어졌습니다. <small>(' + prtDate + ')</small></p>';
 				$( output ).appendTo('#content');
 				$('#content').scrollTop($('#content')[0].scrollHeight);	
+				
+				if ( confirm('서버로부터 연결이 끊어졌습니다. 다시 연결하시겠습니까?') == true)
+				{
+					location.reload();
+				}
+				else
+				{
+					location.href="http://mimo.co.kr";
+				}
 			});
 		};
 		

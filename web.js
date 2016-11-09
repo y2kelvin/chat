@@ -16,6 +16,8 @@ var fns = require('./functions.js');
 var sockIds = {};
 var port = 8001;
 
+fns.dbStart(); //database coinnect!
+
 http.listen(port, function() {
      console.log('Server running at '+port+' port');
 });
@@ -50,18 +52,19 @@ io.sockets.on( 'connection', function(socket){
 	==============================*/
 	socket.on( 'join', function(data){ //가입
 		
-		var prtDate = fns.getNowTime();
-		
-		console.log(socket.id + ' join> '+data.name+'님이 ' + data.room+'방에 입장하셨습니다.'); 
-		sockIds[socket.id] = data.name;		
-		
+		var prtDate = fns.getNowTime();				
+		sockIds[socket.id] = [data.id, data.name];				
 		socket.join(data.room); 			//사용자가 입력한 방에 socket을 참여시킨다.
 		socket.room = data.room; 		//'room' 속성에 사용자가 입력한 방이름을 저장한다.
+		var message = data.name+'님이 ' + data.room+'방에 입장하셨습니다.';
+		
 		io.sockets.in( socket.room ).emit('message', {
 			name : 'MiMO',
-			message : data.name+'님이 ' + data.room+'방에 입장하셨습니다.',
+			message : message,
 			date : prtDate
-		  });
+	    });
+		console.log('join> ' + message); 
+		fns.dbInsert(socket.room, data.id, data.name, message); // database
 	});	
 	
 	/* 메세지
@@ -70,6 +73,8 @@ io.sockets.on( 'connection', function(socket){
 		//'room' 속성값에 해당하는 방에 참여중인 Client에 메세지를 보낸다.
 		console.log( 'message> id : %s, name : %s, msg : %s, date : %s', data.id, data.name, data.message, data.date );
 		io.sockets.in( socket.room ).emit('message', data); //public 통신 : io.sockets.emit(...);
+		
+		fns.dbInsert(socket.room, data.id, data.name, data.message);
 	});
 	
 	/* 퇴장
@@ -79,14 +84,19 @@ io.sockets.on( 'connection', function(socket){
 	  
 	  console.log( socket.id+' disconnect event At ' + prtDate +'\n');
 	  
+	  var id = sockIds[socket.id][0]
+	  var name = sockIds[socket.id][1];
+	  var message = name+'님이 퇴장하셨습니다.';  
 	  io.sockets.in( socket.room ).emit('message', {
 		name : 'MiMO',
-		message : sockIds[socket.id]+'님이 퇴장하셨습니다.',
+		message : message,
 		date : prtDate
 	  });
+	  	  
+	  console.log('disconnect> ' + message);	  
+	  fns.dbInsert(socket.room, id, name, message); // database
 	  
 	  delete sockIds[socket.id];	  
-	  console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
-	  
+	  //console.log(' array length: ' + Object.keys(sockIds).length +'\n' );
 	});
 });
