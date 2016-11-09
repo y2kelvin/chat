@@ -87,7 +87,8 @@ io.sockets.on( 'connection', function(socket){
 	  
 	  //var id = sockIds[socket.id][0];
 	  //var name = sockIds[socket.id][1];
-	  //var message = name+'님이 퇴장하셨습니다.';  
+	  var name = sockIds[socket.id];
+	  var message = name+'님이 퇴장하셨습니다.';  
 	  io.sockets.in( socket.room ).emit('message', {
 		name : 'MiMO',
 		message : message,
