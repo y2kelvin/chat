@@ -98,10 +98,22 @@ var keepalive = function ()
 }
 
 // Insert 쓰기
-exports.dbInsert = function(room, id, name, msg)
+exports.dbInsert = function(room, id, name, msg, callback)
 {	
 	connection.query('INSERT INTO `mimochat_tbl` (room, user, message, id, date) VALUES (?, ?, ?, ?, now())', [room, name, msg, id], function (err, results, fields) {
 								 if (err) throw err;	
-								 console.log('Insert Query Ok!');
-							});
+								 console.log('Insert Query Ok! ' + results.insertId);								 
+								 callback(results.insertId); // 레코드번호
+						  });
+}
+
+// 대화내용 불러오기
+exports.dbList = function(room, from, callback)
+{
+	// from 이후 번호 읽어오기
+	connection.query('SELECT * FROM `mimochat_tbl` WHERE room = ? and num > ? ', [room, from], function(err, results) {
+		if (err) throw err;	
+		console.log('List Query Ok!');
+		callback(results);
+	});	
 }

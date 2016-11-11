@@ -1,0 +1,322 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+<head>
+  	<title>Chat Client</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/mobile/som/css/base.css">
+    <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/plugins/fontium/css/fontium.css"> 
+    
+    <style>
+		input{
+			height:30px;
+			-webkit-box-sizing:border-box;
+			box-sizing:border-box;
+			vertical-align:top;
+			outline:0;
+		}
+		#content{
+			background-color: #E7EAEF;
+			height: 400px;
+			overflow-y:scroll;
+			-webkit-overflow-scrolling: touch;
+			overflow-scrolling: touch;
+			padding:10px;
+			-webkit-box-sizing:border-box;
+			box-sizing:border-box;
+		}
+		
+		
+		/*대화상자*/
+		p{
+			line-height:1.54em;
+			margin-bottom:10px;
+			color:#777;
+		}		
+		p.talk{
+			display: inline-block;
+			padding:12px;
+			background-color:#FFF;
+			color: #414141;
+			margin-bottom:10px;
+			border-radius:5px;			
+			max-width: 50%;			
+		}		
+		p.talk.me{
+			display: inline-block;
+			float: right;
+			padding:12px;
+			background-color:#74D7E0;
+			color: #414141;
+			margin-bottom:10px;
+			border-radius:5px;			
+			max-width: 50%;			
+		}		
+		
+		/* 이름 */
+		p span.name{
+			font-size:12px;
+			color:#41BAC5;
+		}
+		p.talk.me span.name{
+			display:none;
+		}
+					
+		li:after{
+			  content:'0000.';
+			  display:block;
+			  clear:both;
+			  height:0;
+			  width:0;
+			  visibility: hidden;       
+		}
+		
+		small{
+			color: #aaa;
+		}
+		p.talk small{
+			display:block;
+		}
+		
+		/* 입력 */
+		#inp-bar{
+			position:absolute;
+			left:0;
+			bottom:0;
+			width:100%;
+			height:50px;
+			-webkit-box-sizing:border-box;
+			box-sizing:border-box;
+			padding:10px 0 10px 5px;
+			background-color:#FFF;
+		}
+		
+	</style>
+  	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 	
+	<script src="/socket.io/socket.io.js"></script>   
+
+	<script type="text/javascript">
+		
+		var getNowTime = function ()
+		{			
+			var day=new Date(); 
+			var y=day.getYear(); 
+			if(y<2000)y=y+1900; 
+			var mon=day.getMonth(); 
+			var date=day.getDate(); 
+			var h = day.getHours();
+			var m = day.getMinutes();
+			var s = day.getSeconds();
+			return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
+		}
+	
+		var socket;
+		var protocol = 'join';
+		var room, userId, name;
+		var latestTime, lstNum; //가장 최근메세지 수신시간, 번호
+		
+		window.onload = function(){
+			room = '<%= room %>';
+			userId = '<%= id %>';
+			name = '<%= name %>';			
+			
+			serverConnect(); // 최초접속
+		};
+		
+		// 서버 재연결 (끊고)
+		function serverReconnect(){
+			
+			if(socket)
+			{
+				socket.disconnect();
+				serverConnect();
+			}			
+		}
+		
+		// 서버 연결
+		function serverConnect()
+		{
+			/*************************************************************				
+				서버 접속
+			*************************************************************/	
+			
+			socket = io.connect(); //소켓서버 연결				
+						
+			socket.emit( protocol, { // join or rejoin 
+				id: userId,				
+				name: name,
+				room: room,				
+				num: lstNum // rejoin
+			});			
+			
+			/*************************************************************				
+				메세지 수신				
+			*************************************************************/			
+			socket.on( 'message', function(data){
+				latestTime = data.date;
+				lstNum = data.num;
+				
+				if( data.name == 'MiMO' )
+				{
+					//var output = '<p><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small>'+data.num+'</p>';
+					var output = '<li><p><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small></p></li>';
+					$( output ).appendTo('#content');
+					$('#content').scrollTop($('#content')[0].scrollHeight);	
+				}
+				else
+				{
+					// 대화
+					
+					if( data.name == '<%= name %>' ) // 나
+					{
+						var output = '<li><p class="talk me"><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small></p><br></li>';
+						$( output ).appendTo('#content');
+						$('#content').scrollTop($('#content')[0].scrollHeight);	
+					}
+					else
+					{
+						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' + data.message + ' <small>(' + data.date + ')</small></p><br></li>';
+						$( output ).appendTo('#content');
+						$('#content').scrollTop($('#content')[0].scrollHeight);	
+					}
+				}				
+				
+			});	
+			
+			socket.on('connect_error', function(data){
+							
+				//console.log('Connection Failed ' + data);
+				/*
+				var output = '<p>Connection Failed ' + data+'</p>';
+				$( output ).appendTo('#content');
+				$('#content').scrollTop($('#content')[0].scrollHeight);	
+				*/
+				
+				if ( data == 'timeout' )
+				{	
+					if(confirm('서버와의 연결이 끊어졌습니다. 다시 연결하시겠습니까?') == true)
+					{
+						protocol = 'rejoin';
+						serverReconnect();									
+					}
+					else
+					{
+					}					
+				}
+			});
+			
+			// 서버가 끊어짐			
+			socket.on( 'disconnect', function(data){  
+				/*
+				var prtDate = getNowTime();  
+				var output = '<p>서버로부터 연결이 끊어졌습니다. <small>(' + prtDate + ')</small></p>';
+				$( output ).appendTo('#content');
+				$('#content').scrollTop($('#content')[0].scrollHeight);	
+				*/				
+				setTimeout(function()
+				{					
+					protocol = 'rejoin';
+					serverReconnect();					
+				}, 0);
+			});
+			
+		}
+		
+		
+		function heightAlign()
+		{
+			winH = $(window).height();
+			conH = winH - 60 - 50 - 20;	 // top+footer+padding
+			$("#content").height(conH);
+		}
+		
+		$(function(){
+			
+			// UI
+			heightAlign();
+			
+			// 메세지 전송
+			$('#button').click(function(){
+				
+				if( !$("#msg").val() || $('#msg').val().replace(/\s/g,"").length == 0 )
+				{
+					//console.log('공백');
+					$("#msg").val('')
+					return;
+				}
+				
+				var uid = $('#uid').val();
+				var name = $('#name').val();
+				var msg = $('#msg').val();
+				
+				//서버측 'message' 이벤트를 호출한다. 이때 msg 전달
+				var prtDate = getNowTime();
+				socket.emit('message', {
+					id : uid,
+					name : name,
+					message : msg,
+					date : prtDate
+				}); //서버측 'message' 이벤트를 호출한다. 이때 msg 전달
+				
+				var msg = $('#msg').val(''); //메세지 내용 초기화
+			});
+			
+			// 퇴장 
+			$('#button2').click(function(){				
+				location.href="http://mimo.co.kr";
+			});
+			
+			// 메세지 엔터입력
+			$(document).on("keydown", "#msg", function(event) {
+				  
+				   if( window.netscape )
+				   {                                       
+						// FF         
+						if(event.which == '13') {
+							 $("#button").trigger("click");
+							 event.preventDefault();
+						}
+				   }
+				   else
+				   {
+						// IE
+						if(event.keyCode == '13') {
+							 $("#button").trigger("click");
+							 event.returnValue=false;
+						}
+				   }                   
+			 });
+			 
+			 $(window).resize(function(e) {
+                heightAlign();
+            });
+			
+		});
+         
+	</script>
+</head>
+<body>
+<div class="wrapper">	
+
+	<div class="header"><div class="back-icon"></div><h1><%= room %></h1></div>
+
+	<ul id="content"></ul>
+    
+    <footer style="height:50px;"></footer>
+
+	<div id="inp-bar">
+        <input type="hidden" id="uid" value="<%=id%>" />
+        <input type="hidden" id="name" value="<%=name%>" />
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td><input type="text" id="msg" autofocus style="width:100%" /></td>
+                <td width="57"><input type="button" id="button" value="메세지" class="button-sm" />
+                <!--<input type="button" id="button2" value="퇴장" class="button-sm" />--></td>
+            </tr>
+        </table>
+    </div>
+    
+</div>
+
+</body>
+</html>
