@@ -127,7 +127,7 @@ exports.dbList = function(room, from, callback)
 {
 	
 	// 지난 대화 삭제쿼리
-	connection.query('DELETE FROM `mimochat_tbl` WHERE room = ? AND date_format(`date`, \'%Y-%m-%d\') < date_add(now(), interval -3 day) ', [room], function(err, results) {
+	connection.query('DELETE FROM `mimochat_tbl` WHERE room = ? AND date_format(`date`, \'%Y-%m-%d\') < date_add(now(), interval -2 day) ', [room], function(err, results) {
 		if (err) throw err;	
 		console.log('지난대화삭제 Query Ok!');		
 	});		
