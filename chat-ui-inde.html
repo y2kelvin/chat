@@ -3,98 +3,14 @@
 <head>
   	<title>Chat Client</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/mobile/som/css/base.css">
+    <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/mobile/css/chat.css">
     <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/plugins/fontium/css/fontium.css"> 
     
     <style>
-		input{
-			height:30px;
-			-webkit-box-sizing:border-box;
-			box-sizing:border-box;
-			vertical-align:top;
-			outline:0;
-		}
-		#content{
-			background-color: #E7EAEF;
-			height: 400px;
-			overflow-y:scroll;
-			-webkit-overflow-scrolling: touch;
-			overflow-scrolling: touch;
-			padding:10px;
-			-webkit-box-sizing:border-box;
-			box-sizing:border-box;
-		}
-		
-		
-		/*대화상자*/
-		p{
-			line-height:1.54em;
-			margin-bottom:10px;
-			color:#777;
-		}		
-		p.talk{
-			display: inline-block;
-			padding:12px;
-			background-color:#FFF;
-			color: #414141;
-			margin-bottom:10px;
-			border-radius:5px;			
-			max-width: 50%;			
-		}		
-		p.talk.me{
-			display: inline-block;
-			float: right;
-			padding:12px;
-			background-color:#74D7E0;
-			color: #414141;
-			margin-bottom:10px;
-			border-radius:5px;			
-			max-width: 50%;			
-		}		
-		
-		/* 이름 */
-		p span.name{
-			font-size:12px;
-			color:#41BAC5;
-		}
-		p.talk.me span.name{
-			display:none;
-		}
-		
-		ul{
-			list-style:none;
-		}
-		li:after{
-			  content:'0000.';
-			  display:block;
-			  clear:both;
-			  height:0;
-			  width:0;
-			  visibility: hidden;       
-		}
-		
-		small{
-			color: #aaa;
-		}
-		p.talk small{
-			display:block;
-		}
-		
-		/* 입력 */
-		#inp-bar{
-			position:absolute;
-			left:0;
-			bottom:0;
-			width:100%;
-			height:50px;
-			-webkit-box-sizing:border-box;
-			box-sizing:border-box;
-			padding:10px 0 10px 5px;
-			background-color:#FFF;
-		}
-		
 	</style>
+    
   	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 	
 	<script src="/socket.io/socket.io.js"></script>   
 
@@ -157,11 +73,24 @@
 			*************************************************************/			
 			socket.on( 'message', function(data){
 				latestTime = data.date;
-				lstNum = data.num;
+				if(data.num){
+					lstNum = data.num;
+				}
+				memlist = data.memlist;
 				
-				if( data.name == 'MiMO' )
+				if(memlist)
+				{					
+					$("#memlist p").text( memlist );
+				}
+				
+				if( data.code && (data.code == 'discon' || data.code == 'rejoin') )
 				{
-					//var output = '<p><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small>'+data.num+'</p>';
+					return;
+				}
+				
+				
+				if( data.name == 'MiMO' ) // 서버메세지 
+				{		
 					var output = '<li><p><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small></p></li>';
 					$( output ).appendTo('#content');
 					$('#content').scrollTop($('#content')[0].scrollHeight);	
@@ -172,13 +101,13 @@
 					
 					if( data.name == '<%= name %>' ) // 나
 					{
-						var output = '<li><p class="talk me"><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small></p><br></li>';
+						var output = '<li><p class="talk me"><span class="name">[' + data.name +']</span> ' + data.message + ' <small>' + data.date + '</small></p><br></li>';
 						$( output ).appendTo('#content');
 						$('#content').scrollTop($('#content')[0].scrollHeight);	
 					}
 					else
 					{
-						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' + data.message + ' <small>(' + data.date + ')</small></p><br></li>';
+						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' + data.message + ' <small>' + data.date + '</small></p><br></li>';
 						$( output ).appendTo('#content');
 						$('#content').scrollTop($('#content')[0].scrollHeight);	
 					}
@@ -186,15 +115,7 @@
 				
 			});	
 			
-			socket.on('connect_error', function(data){
-							
-				//console.log('Connection Failed ' + data);
-				/*
-				var output = '<p>Connection Failed ' + data+'</p>';
-				$( output ).appendTo('#content');
-				$('#content').scrollTop($('#content')[0].scrollHeight);	
-				*/
-				
+			socket.on('connect_error', function(data){				
 				if ( data == 'timeout' )
 				{	
 					if(confirm('서버와의 연결이 끊어졌습니다. 다시 연결하시겠습니까?') == true)
@@ -209,16 +130,10 @@
 			});
 			
 			// 서버가 끊어짐			
-			socket.on( 'disconnect', function(data){  
-				/*
-				var prtDate = getNowTime();  
-				var output = '<p>서버로부터 연결이 끊어졌습니다. <small>(' + prtDate + ')</small></p>';
-				$( output ).appendTo('#content');
-				$('#content').scrollTop($('#content')[0].scrollHeight);	
-				*/				
+			socket.on( 'disconnect', function(data){  				
 				setTimeout(function()
 				{					
-					protocol = 'rejoin';
+					protocol = 'reCon';
 					serverReconnect();					
 				}, 0);
 			});
@@ -229,7 +144,8 @@
 		function heightAlign()
 		{
 			winH = $(window).height();
-			conH = winH - 60 - 50 - 20;	 // top+footer+padding
+			//conH = winH - 60 - 50 - 20;	 // top+footer+padding
+			conH = winH - 98 - 70;	
 			$("#content").height(conH);
 		}
 		
@@ -261,7 +177,7 @@
 					date : prtDate
 				}); //서버측 'message' 이벤트를 호출한다. 이때 msg 전달
 				
-				var msg = $('#msg').val(''); //메세지 내용 초기화
+				var msg = $('#msg').val('').focus(); //메세지 내용 초기화
 			});
 			
 			// 퇴장 
@@ -301,7 +217,14 @@
 <body>
 <div class="wrapper">	
 
-	<div class="header"><div class="back-icon"></div><h1><%= room %></h1></div>
+	<div class="header">
+    	<div class="back-icon-bk"></div>
+    	<h1><%= room %></h1>        
+    </div>
+    
+    <section id="memlist"><p></p></section>
+    
+    <div style="height:98px;"></div>
 
 	<ul id="content"></ul>
     

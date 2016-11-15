@@ -5,13 +5,27 @@ exports.getNowTime = function ()
 	var day=new Date(); 
 	var y=day.getYear(); 
 	if(y<2000)y=y+1900; 
-	var mon=day.getMonth(); 
+	var mon=day.getMonth()+1; 
 	var date=day.getDate(); 
 	var h = day.getHours();
 	var m = day.getMinutes();
 	var s = day.getSeconds();
 	return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
 }
+
+exports.sqlToJsDate = function (unixTimeStamp)
+{
+	var day=new Date(unixTimeStamp); 
+	var y=day.getYear(); 
+	if(y<2000)y=y+1900; 
+	var mon=day.getMonth()+1; 
+	var date=day.getDate(); 
+	var h = day.getHours();
+	var m = day.getMinutes();
+	var s = day.getSeconds();
+	return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s; 
+}
+
 
 // MySQL
 var mysql = require('mysql');
@@ -100,6 +114,7 @@ var keepalive = function ()
 // Insert 쓰기
 exports.dbInsert = function(room, id, name, msg, callback)
 {	
+	// 대화 저장
 	connection.query('INSERT INTO `mimochat_tbl` (room, user, message, id, date) VALUES (?, ?, ?, ?, now())', [room, name, msg, id], function (err, results, fields) {
 								 if (err) throw err;	
 								 console.log('Insert Query Ok! ' + results.insertId);								 
@@ -110,6 +125,14 @@ exports.dbInsert = function(room, id, name, msg, callback)
 // 대화내용 불러오기
 exports.dbList = function(room, from, callback)
 {
+	
+	// 지난 대화 삭제쿼리
+	connection.query('DELETE FROM `mimochat_tbl` WHERE room = ? AND date_format(`date`, \'%Y-%m-%d\') < date_add(now(), interval -3 day) ', [room], function(err, results) {
+		if (err) throw err;	
+		console.log('지난대화삭제 Query Ok!');		
+	});		
+	
+	
 	// from 이후 번호 읽어오기
 	connection.query('SELECT * FROM `mimochat_tbl` WHERE room = ? and num > ? ', [room, from], function(err, results) {
 		if (err) throw err;	
