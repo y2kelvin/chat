@@ -34,8 +34,8 @@ app.get( '/:code/:id/:name' , function(request, response) {
 	var name = request.params.name;   	
 	//console.log('express get room: '+room+' userId: ' + userId + ' name: '+ name );		
 	
-	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui-inde.html', 'utf-8', function(error, data){ // cafe24
-	//fs.readFile( './chat-ui-inde.html', 'utf-8', function(error, data){		
+	//fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui-inde.html', 'utf-8', function(error, data){ // cafe24
+	fs.readFile( './chat-ui-inde.html', 'utf-8', function(error, data){		
 		response.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		response.end( ejs.render(data, {
 			room: room,
@@ -131,6 +131,8 @@ io.sockets.on( 'connection', function(socket){
 			 publicMessage('rejoin', data); // 전체 메세지
 		});
 		
+		console.log('reCon> ' +  data.name + '님 재접속 ' +  data.num);
+		
 	});	
 	
 	
@@ -165,7 +167,7 @@ io.sockets.on( 'connection', function(socket){
 			 });
 		});
 		
-		console.log('reCon> ' +  data.name + '님 재접속'); 			
+		console.log('reCon> ' +  data.name + '님 재접속 ' + data.num); 			
 		
 	});	
 	

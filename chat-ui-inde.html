@@ -12,7 +12,8 @@
 	</style>
     
   	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 	
-	<script src="/socket.io/socket.io.js"></script>   
+	<script src="/socket.io/socket.io.js"></script>
+    
 
 	<script type="text/javascript">
 		
@@ -26,7 +27,8 @@
 			var h = day.getHours();
 			var m = day.getMinutes();
 			var s = day.getSeconds();
-			return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
+			//return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
+			return mon + '/' + date +' ' + h + ':' + m ;
 		}
 	
 		var socket;
@@ -101,13 +103,13 @@
 					
 					if( data.name == '<%= name %>' ) // 나
 					{
-						var output = '<li><p class="talk me"><span class="name">[' + data.name +']</span> ' + data.message + ' <small>' + data.date + '</small></p><br></li>';
+						var output = '<li align="right"><div class="time">' + data.date + '</div>&nbsp;<p class="talk me"><span class="name">[' + data.name +']</span> ' + data.message + '</p></li>';
 						$( output ).appendTo('#content');
 						$('#content').scrollTop($('#content')[0].scrollHeight);	
 					}
 					else
 					{
-						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' + data.message + ' <small>' + data.date + '</small></p><br></li>';
+						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' + data.message + '</p>&nbsp;<div class="time">' + data.date + '</div>&nbsp;</li>';
 						$( output ).appendTo('#content');
 						$('#content').scrollTop($('#content')[0].scrollHeight);	
 					}

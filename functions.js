@@ -10,7 +10,8 @@ exports.getNowTime = function ()
 	var h = day.getHours();
 	var m = day.getMinutes();
 	var s = day.getSeconds();
-	return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
+	//return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
+	return mon + '/' + date +' ' + h + ':' + m ;
 }
 
 exports.sqlToJsDate = function (unixTimeStamp)
@@ -23,7 +24,8 @@ exports.sqlToJsDate = function (unixTimeStamp)
 	var h = day.getHours();
 	var m = day.getMinutes();
 	var s = day.getSeconds();
-	return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s; 
+	//return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s; 	
+	return mon + '/' + date +' ' + h + ':' + m ;
 }
 
 
@@ -56,7 +58,7 @@ exports.dbStart = function ()
 // Connect 연결 
 var dbconnect = function ()
 {	
-	connection = mysql.createConnection(cafe24_config);
+	connection = mysql.createConnection(db_config);
 	
 	connection.connect(function(err) { 
 		if(err) { // or restarting (takes a while sometimes).
@@ -134,7 +136,7 @@ exports.dbList = function(room, from, callback)
 	
 	
 	// from 이후 번호 읽어오기
-	connection.query('SELECT * FROM `mimochat_tbl` WHERE room = ? and num > ? ', [room, from], function(err, results) {
+	connection.query('SELECT * FROM `mimochat_tbl` WHERE room = ? and num > ? ORDER BY num', [room, from], function(err, results) {
 		if (err) throw err;	
 		console.log('List Query Ok!');
 		callback(results);
