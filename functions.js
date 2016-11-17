@@ -1,4 +1,5 @@
 // JavaScript Document
+// 로컬원격 수정사항 : cafe24_config
 
 exports.getNowTime = function ()
 {			

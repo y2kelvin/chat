@@ -3,6 +3,7 @@
 	express 채팅서버 v1.0.1
 	2016-11-08
 	송진호 팀장
+	로컬원격 수정사항 : fs.readFile
 
 ==================================*/
 
@@ -65,7 +66,11 @@ io.sockets.on( 'connection', function(socket){
 		sockIds[socket.id].name = data.name;		
 		socket.join(room); 			//사용자가 입력한 방에 socket을 참여시킨다.
 		socket.room = room; 		//'room' 속성에 사용자가 입력한 방이름을 저장한다.		
-		addRoomMem(data.room, socket.id, data.name); // 방 멤버 추가! 			 		
+		
+		disconnectSocket(data.room, socket.id, data.name);
+		
+		//addRoomMem(data.room, socket.id, data.name); // 방 멤버 추가! 		
+			 		
 		console.log( '소컷ID: ' + socket.id+' JOIN 요청등록 ' + prtDate +'\n');
 		
 
@@ -201,7 +206,7 @@ io.sockets.on( 'connection', function(socket){
 	socket.on('disconnect', function(data){  
 	  
 	  var prtDate = fns.getNowTime();
-	  console.log( '소컷ID: ' + socket.id +' code: '+ data + ' ... disconnect event At ' + prtDate +'\n');
+	  console.log( 'disconnect 이벤트 : ' + socket.id +' code: '+ data + '  ' + prtDate +'\n');
 	  
 	  if( typeof sockIds[socket.id] != 'undefined' && typeof sockIds[socket.id].id != 'undefined' )
 	  {		
@@ -248,6 +253,7 @@ function addRoomMem(room, sockid, name)
 		room 객체 생성 mrm 추가
 	************************************************************/	
 	if(!sockRoom[room]){
+		console.log('새방 개설!');
 		sockRoom[room] = {};			
 	};
 	sockRoom[room][sockid] = [];
@@ -260,10 +266,56 @@ function addRoomMem(room, sockid, name)
 		memList.push( sockRoom[room][val].name );
 	};		
 	console.log('current room members : '+memList.toString());
-	/************************************************************/
+	
 }
 
-function deleteRoomMem( room, sockid )
+// 소켓을 끊는 함수
+function disconnectSocket( room, sockid, name ) // 멤버속성을 키로 소켓을 찾아 끊는다.
+{
+	if(!sockRoom[room]){
+		// 최초 방개설
+		console.log('신규소켓으로 추가(1)');
+		addRoomMem(room, sockid, name); // 방 멤버 추가! 	
+		return;
+	};
+	
+	console.log('소켓을 찾기...');
+	
+	var found = false;
+	for ( val in sockRoom[room] ){			
+		if( sockRoom[room][val].name == name )
+		{			
+			console.log('소켓을 찾았음. ' + val);
+			
+			found = true;
+			
+			delete sockRoom[room][val];		
+			console.log('소켓을 끊고 메모리삭제 완료. ');
+			
+			io.sockets.to( val ).emit('message', { // Private 메세지
+				name : 'MiMO',
+				message : '서버와의 연결이 종료되었습니다.',
+				code : 'closed',
+				date : prtDate	
+			});
+			
+			io.sockets.connected[val].disconnect(); // 끊기
+		
+			console.log('소켓으로 추가 ');		
+			addRoomMem(room, sockid, name); // 방 멤버 추가! 	
+			
+			break;
+		};
+	};
+	
+	if(found == false)
+	{
+		console.log('신규소켓으로 추가(2)');
+		addRoomMem(room, sockid, name); // 방 멤버 추가! 	
+	}
+}
+
+function deleteRoomMem( room, sockid ) // 소켓id를 키로 찾아 배열에서 삭제
 {
 	/************************************************************
 		room mem 객체 제거
@@ -277,7 +329,7 @@ function deleteRoomMem( room, sockid )
 			 if( Object.keys(sockRoom[room]).length == 0 )
 			 {
 				 // 멤버가 모두 탈퇴하면 객체삭제
-				 console.log('room mem cnt: 0 then delete room!');
+				 console.log('빈방: ' + room);
 				 delete sockRoom[room];
 			 }
 			 break;
@@ -289,8 +341,7 @@ function deleteRoomMem( room, sockid )
 	for ( val in sockRoom[room] ){						
 		memList.push( sockRoom[room][val].name );
 	};		
-	console.log('current room members : '+memList.toString());
-	/************************************************************/
+	console.log('current room members : '+memList.toString());	
 }
 
 function publicMessage(code, data)

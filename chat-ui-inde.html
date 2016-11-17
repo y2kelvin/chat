@@ -35,6 +35,7 @@
 		var protocol = 'join';
 		var room, userId, name;
 		var latestTime, lstNum; //가장 최근메세지 수신시간, 번호
+		var serverCode;
 		
 		window.onload = function(){
 			room = '<%= room %>';
@@ -74,10 +75,24 @@
 				메세지 수신				
 			*************************************************************/			
 			socket.on( 'message', function(data){
+				
+				$("#msg").prop("disabled", false).css("backgroundColor","#ededed");
+				
 				latestTime = data.date;
+				
 				if(data.num){
 					lstNum = data.num;
 				}
+				
+				if(data.code)
+				{
+					serverCode = data.code;
+				}
+				else
+				{
+					serverCode = '';
+				}
+				
 				memlist = data.memlist;
 				
 				if(memlist)
@@ -133,11 +148,27 @@
 			
 			// 서버가 끊어짐			
 			socket.on( 'disconnect', function(data){  				
-				setTimeout(function()
-				{					
-					protocol = 'reCon';
-					serverReconnect();					
-				}, 0);
+			
+				if( serverCode == 'closed' ) // 서버가 끊었는지 확인한다.
+				{
+					if(confirm('서버와의 연결이 끊어졌습니다. 다시 연결하시겠습니까?') == true)
+					{
+						protocol = 'join';
+						serverReconnect();									
+					}
+					else
+					{						
+						$("#msg").prop("disabled", true).css("backgroundColor","#fafafa");
+					}	
+				}
+				else
+				{
+					setTimeout(function()
+					{					
+						protocol = 'reCon';
+						serverReconnect();					
+					}, 0);
+				}
 			});
 			
 		}
