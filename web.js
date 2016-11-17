@@ -298,12 +298,13 @@ function disconnectSocket( room, sockid, name ) // 멤버속성을 키로 소켓
 				code : 'closed',
 				date : prtDate	
 			});
-			
-			io.sockets.connected[val].disconnect(); // 끊기
-		
-			console.log('소켓으로 추가 ');		
-			addRoomMem(room, sockid, name); // 방 멤버 추가! 	
-			
+	
+			setTimeout(function(){		
+				io.sockets.connected[val].disconnect(); // 끊기		
+				console.log('소켓으로 추가 ');		
+				addRoomMem(room, sockid, name); // 방 멤버 추가! 	
+			}, 1000);
+				
 			break;
 		};
 	};
