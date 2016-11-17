@@ -90,6 +90,7 @@
 				{
 					console.log(data.code+'코드 수신');
 					serverCode = data.code;
+					socket.disconnect();
 				}
 				
 				memlist = data.memlist;
