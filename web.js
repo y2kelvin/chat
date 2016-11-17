@@ -35,8 +35,8 @@ app.get( '/:code/:id/:name' , function(request, response) {
 	var name = request.params.name;   	
 	//console.log('express get room: '+room+' userId: ' + userId + ' name: '+ name );		
 	
-	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui-inde.html', 'utf-8', function(error, data){ // cafe24
-	//fs.readFile( './chat-ui-inde.html', 'utf-8', function(error, data){		
+	//fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui-inde.html', 'utf-8', function(error, data){ // cafe24
+	fs.readFile( './chat-ui-inde.html', 'utf-8', function(error, data){		
 		response.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		response.end( ejs.render(data, {
 			room: room,
@@ -48,12 +48,44 @@ app.get( '/:code/:id/:name' , function(request, response) {
 	
 });
 
+// Admin - id/pw 방식
+app.get( '/:id/:pw' , function(request, response) {
+    
+	// params	
+	var room = '관리자';           
+	var userId = request.params.id;            
+	var pw = request.params.pw; 	       
+	var name = 'MiMO';
+	
+	if( userId == 'admin' && pw == 'okokchat' )
+	{
+		fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-admin.html', 'utf-8', function(error, data){ // cafe24
+		//fs.readFile( './chat-admin.html', 'utf-8', function(error, data){									
+			
+			console.log('admin 접속'); 			
+			
+			response.writeHead( 200, { 'Content-Type' : 'text/html' } );
+			response.end( ejs.render(data, {
+				room: room,
+				id: userId,
+				name: name,
+				memlist: '관리자모드 접속중'			
+			}) );
+		}); 	
+		
+	}	
+});
+
+
+
+
 // 소켓 통신
 var io = socketio.listen(http);
 io.sockets.on( 'connection', function(socket){
 	
 	//console.log( '소컷ID: ' + socket.id+' 소켓 연결 ' + prtDate +'\n');
 	
+		
 	/* 가입
 	==============================*/
 	socket.on( 'join', function(data){ //가입
@@ -71,7 +103,7 @@ io.sockets.on( 'connection', function(socket){
 		
 		//addRoomMem(data.room, socket.id, data.name); // 방 멤버 추가! 		
 			 		
-		console.log( '소컷ID: ' + socket.id+' JOIN 요청등록 ' + prtDate +'\n');
+		console.log( '소컷ID=> ' + socket.id+' 룸=> ' + data.room + ' JOIN 요청등록 ' + prtDate +'\n');
 		
 
 		// 개인 메세지
@@ -197,7 +229,28 @@ io.sockets.on( 'connection', function(socket){
 		}
 	});
 	
+	/* 공지메세지
+	==============================*/
+	socket.on( 'notice', function(data){ //공지메세지
 	
+		console.log('관리자 메세지 수신: '+data.message);
+		
+		var prtDate = fns.getNowTime();	
+		io.sockets.emit('message', {
+			name : 'MiMO',
+			message : data.message,
+			date : prtDate,
+			memlist : '관리자 접속중'
+		});		
+		
+		// 등록된 소켓ID의 메세지만 처리
+		if( typeof sockIds[socket.id] != 'undefined' && typeof sockIds[socket.id].id != 'undefined' )
+	  	{
+			fns.dbInsert(socket.room, data.id, data.name, data.message, function(lastnum){				
+				console.log(data);				
+			});
+		}				
+	});
 	
 	
 	
