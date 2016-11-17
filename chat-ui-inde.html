@@ -215,8 +215,9 @@
 			});
 			
 			// 퇴장 
-			$('#button2, #back-btn').click(function(){				
-				location.href="http://mimo.co.kr";
+			$('#button2, #back-btn').click(function(){	
+				socket.disconnect(); 			
+				location.history.go(-1);
 			});
 			
 			// 메세지 엔터입력
