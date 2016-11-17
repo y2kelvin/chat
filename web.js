@@ -239,8 +239,7 @@ io.sockets.on( 'connection', function(socket){
 		io.sockets.emit('message', {
 			name : 'MiMO',
 			message : data.message,
-			date : prtDate,
-			memlist : '관리자 접속중'
+			date : prtDate			
 		});		
 		
 		// 등록된 소켓ID의 메세지만 처리
