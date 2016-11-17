@@ -62,6 +62,8 @@
 				서버 접속
 			*************************************************************/	
 			
+			serverCode = '';
+			
 			socket = io.connect(); //소켓서버 연결				
 						
 			socket.emit( protocol, { // join or rejoin 
@@ -84,14 +86,10 @@
 					lstNum = data.num;
 				}
 				
-				if(data.code)
+				if(data.code == 'closed')
 				{
 					console.log(data.code+'코드 수신');
 					serverCode = data.code;
-				}
-				else
-				{
-					serverCode = '';
 				}
 				
 				memlist = data.memlist;
