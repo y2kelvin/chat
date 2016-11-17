@@ -289,7 +289,7 @@ function disconnectSocket( room, sockid, name ) // 멤버속성을 키로 소켓
 			
 			found = true;
 			
-			delete sockRoom[room][val];		
+			delete sockRoom[room][val]; 	
 			console.log('소켓을 끊고 메모리삭제 완료. ');
 			
 			io.sockets.to( val ).emit('message', { // Private 메세지
@@ -298,12 +298,10 @@ function disconnectSocket( room, sockid, name ) // 멤버속성을 키로 소켓
 				code : 'closed',
 				date : prtDate	
 			});
-	
-			setTimeout(function(){		
-				//io.sockets.connected[val].disconnect(); // 끊기		
-				console.log('소켓으로 추가 ');		
-				addRoomMem(room, sockid, name); // 방 멤버 추가! 	
-			}, 1000);
+
+			//io.sockets.connected[val].disconnect(); // 끊기		
+			console.log('소켓으로 추가 ');		
+			addRoomMem(room, sockid, name); // 방 멤버 추가! 	
 				
 			break;
 		};
