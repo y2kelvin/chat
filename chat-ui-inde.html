@@ -187,6 +187,14 @@
 			// UI
 			heightAlign();
 			
+			$(window).unload( function() {    
+				if(socket) socket.disconnect(); 						  
+			}); 
+			
+			$(window).on( "beforeunload", function() { // IE에서 오류
+				if(socket) socket.disconnect(); 							
+			});
+			
 						
 			// 메세지 전송
 			$('#button').click(function(){
@@ -216,8 +224,8 @@
 			
 			// 퇴장 
 			$('#button2, #back-btn').click(function(){	
-				socket.disconnect(); 			
-				location.history.go(-1);
+				if(socket) socket.disconnect(); 			
+				window.history.go(-1);
 			});
 			
 			// 메세지 엔터입력
