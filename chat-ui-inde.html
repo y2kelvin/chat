@@ -86,11 +86,11 @@
 					lstNum = data.num;
 				}
 				
-				if(data.code == 'closed')
+				if(data.code == 'closed') // 서버로부터 연결종료 메세지 수신
 				{
-					console.log(data.code+'코드 수신');
+					//console.log(data.code+'코드 수신');
 					serverCode = data.code;
-					socket.disconnect();
+					socket.disconnect(); // 수동적 close
 				}
 				
 				memlist = data.memlist;
@@ -187,6 +187,7 @@
 			// UI
 			heightAlign();
 			
+						
 			// 메세지 전송
 			$('#button').click(function(){
 				
@@ -214,7 +215,7 @@
 			});
 			
 			// 퇴장 
-			$('#button2').click(function(){				
+			$('#button2, #back-btn').click(function(){				
 				location.href="http://mimo.co.kr";
 			});
 			
@@ -251,7 +252,7 @@
 <div class="wrapper">	
 
 	<div class="header">
-    	<div class="back-icon-bk"></div>
+    	<div id="back-btn" class="back-icon-bk"></div>
     	<h1><%= room %></h1>        
     </div>
     
