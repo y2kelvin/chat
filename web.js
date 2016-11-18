@@ -10,7 +10,8 @@
 var fs = require('fs');
 var ejs = require('ejs');
 var url = require('url');
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').createServer(app);
 var socketio = require('socket.io');
 var fns = require('./functions.js');
@@ -25,6 +26,10 @@ http.listen(port, function() {
      
 	 console.log('Server running at '+port+' port');	 
 });
+
+app.use('/plugins', express.static(__dirname + "/plugins"));
+app.use('/script', express.static(__dirname + "/script"));
+app.use('/images', express.static(__dirname + "/images"));
 
 // Client - room/id/name 방식
 app.get( '/:code/:id/:name' , function(request, response) {
@@ -116,11 +121,22 @@ io.sockets.on( 'connection', function(socket){
 		
 		// 이전대화내용 전송
 		
+		
 		fns.dbList( data.room, 0, function(result){ // 처음부터 
 			 
+			 var protocol = 'message';
 			 result.forEach(function(item, index)
 			 {	
-				io.sockets.to( socket.id ).emit('message', { // Private 메세지
+			 	if (item.code == 'emot')
+				{
+					protocol = 'emot';
+				}
+				else
+				{
+					protocol = 'message';
+				}
+				
+				io.sockets.to( socket.id ).emit(protocol, { // Private 메세지
 					id : item.id,
 					name : item.user,
 					message : item.message,
@@ -152,11 +168,21 @@ io.sockets.on( 'connection', function(socket){
 		
 		// 이전대화내용 전송
 		
+		
 		fns.dbList( data.room, data.num, function(result){ // 최근 대화내용 읽어오기 (요청번호)
 			
+			 var protocol = 'message';
 			 result.forEach(function(item, index)
-			 {		
-				io.sockets.to( socket.id ).emit('message', { // Private 메세지
+			 {				
+				if (item.code == 'emot')
+				{
+					protocol = 'emot';
+				}
+				else
+				{
+					protocol = 'message';
+				}		
+				io.sockets.to( socket.id ).emit(protocol, { // Private 메세지
 					id : item.id,
 					name : item.user,
 					message : item.message,
@@ -192,9 +218,18 @@ io.sockets.on( 'connection', function(socket){
 		
 		fns.dbList( data.room, data.num, function(result){ // 최근 대화내용 읽어오기 (요청번호)
 			
+			 var protocol = 'message';
 			 result.forEach(function(item, index)
-			 {		
-				io.sockets.to( socket.id ).emit('message', { // Private 메세지
+			 {
+				if (item.code == 'emot')
+				{
+					protocol = 'emot';
+				}
+				else
+				{
+					protocol = 'message';
+				}		 		
+				io.sockets.to( socket.id ).emit(protocol, { // Private 메세지
 					id : item.id,
 					name : item.user,
 					message : item.message,
@@ -223,13 +258,33 @@ io.sockets.on( 'connection', function(socket){
 		// 등록된 소켓ID의 메세지만 처리
 		if( typeof sockIds[socket.id] != 'undefined' && typeof sockIds[socket.id].id != 'undefined' )
 	  	{
-			fns.dbInsert(socket.room, data.id, data.name, data.message, function(lastnum){				
+			fns.dbInsert(socket.room, data.id, data.name, data.message, data.code, function(lastnum){				
 				console.log(data);
 				data.num = lastnum;				
 				io.sockets.in( socket.room ).emit('message', data); // public 메세지
 			});
 		}
 	});
+	
+	/* 이모티콘 수신
+	==============================*/
+	socket.on( 'emot', function(data){
+		
+		console.log( 'message> id : %s, name : %s, msg : %s, date : %s', data.id, data.name, data.message, data.date );
+				
+		// 등록된 소켓ID의 메세지만 처리
+		if( typeof sockIds[socket.id] != 'undefined' && typeof sockIds[socket.id].id != 'undefined' )
+	  	{
+			fns.dbInsert(socket.room, data.id, data.name, data.message, data.code, function(lastnum){				
+				console.log(data);
+				data.num = lastnum;				
+				io.sockets.in( socket.room ).emit('emot', data); // public 메세지
+			});
+		}
+	});
+	
+	
+	
 	
 	/* 공지메세지
 	==============================*/
@@ -247,7 +302,7 @@ io.sockets.on( 'connection', function(socket){
 		// 등록된 소켓ID의 메세지만 처리
 		if( typeof sockIds[socket.id] != 'undefined' && typeof sockIds[socket.id].id != 'undefined' )
 	  	{
-			fns.dbInsert(socket.room, data.id, data.name, data.message, function(lastnum){				
+			fns.dbInsert(socket.room, data.id, data.name, data.message, data.code, function(lastnum){				
 				console.log(data);				
 			});
 		}				

@@ -67,23 +67,14 @@ var dbconnect = function ()
 		  setTimeout(dbconnect, 2000); 
 		}  	
 		// connect success!
-		connection.query('INSERT INTO `mimochat_tbl` (room, user, message, id, date) VALUES (?, ?, ?, ?, now())', 
-			['', 'server', 'DB서버 연결', 'mimo'], 
+		connection.query('INSERT INTO `mimochat_tbl` (room, user, message, id, code, date) VALUES (?, ?, ?, ?, ?, now())', 
+			['', 'server', 'DB서버 연결', '', 'mimo'], 
 			function (err, results, fields){
 				 if (err) throw err;
 				 console.log('db connect Ok!');
 			});
 	});
-	
-	/*
-	connection.query('SELECT * FROM `mimochat_tbl` ', function(err, rows, fields) {
-	  if (err) throw err;	
-	  console.log('Query Ok!');
-	});	
-	
-	connection.end();
-	*/
-	
+
 	connection.on('error', function(err) {
 		console.log('db error', err);
 		if(err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
@@ -115,10 +106,10 @@ var keepalive = function ()
 }
 
 // Insert 쓰기
-exports.dbInsert = function(room, id, name, msg, callback)
+exports.dbInsert = function(room, id, name, msg, code, callback)
 {	
 	// 대화 저장
-	connection.query('INSERT INTO `mimochat_tbl` (room, user, message, id, date) VALUES (?, ?, ?, ?, now())', [room, name, msg, id], function (err, results, fields) {
+	connection.query('INSERT INTO `mimochat_tbl` (room, user, message, id, code, date) VALUES (?, ?, ?, ?, ?, now())', [room, name, msg, id, code], function (err, results, fields) {	
 								 if (err) throw err;	
 								 console.log('Insert Query Ok! ' + results.insertId);								 
 								 callback(results.insertId); // 레코드번호

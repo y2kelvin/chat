@@ -6,36 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/mobile/som/css/base.css">
     <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/mobile/css/chat.css">
-    <link rel="stylesheet" type="text/css" href="http://mimo.co.kr/plugins/fontium/css/fontium.css"> 
+    <link rel="stylesheet" type="text/css" href="/plugins/fontium/css/fontium.css"/> 
     
     <style>
 	</style>
     
   	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> 	
 	<script src="/socket.io/socket.io.js"></script>
-    
+    <script src="/script/client.js"></script>    
 
 	<script type="text/javascript">
-		
-		var getNowTime = function ()
-		{			
-			var day=new Date(); 
-			var y=day.getYear(); 
-			if(y<2000)y=y+1900; 
-			var mon=day.getMonth(); 
-			var date=day.getDate(); 
-			var h = day.getHours();
-			var m = day.getMinutes();
-			var s = day.getSeconds();
-			//return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
-			return mon + '/' + date +' ' + h + ':' + m ;
-		}
-		
-		function nl2br (str, is_xhtml) {   
-			var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';   
-			return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
-		}
-
 	
 		var socket;
 		var protocol = 'join';
@@ -84,7 +64,7 @@
 			*************************************************************/			
 			socket.on( 'message', function(data){
 				
-				$("#msg").prop("disabled", false).css("backgroundColor","#ededed");
+				//$("#msg").prop("disabled", false).css("backgroundColor","#ededed");
 				
 				latestTime = data.date;
 				
@@ -137,6 +117,56 @@
 				}				
 				
 			});	
+			
+			socket.on( 'emot', function(data){
+				
+				//$("#msg").prop("disabled", false).css("backgroundColor","#ededed");
+				
+				latestTime = data.date;
+				
+				if(data.num){
+					lstNum = data.num;
+				}
+				
+				memlist = data.memlist;
+				
+				if(memlist)
+				{					
+					$("#memlist p").text( memlist );
+				}
+				
+				if( data.code && (data.code == 'discon' || data.code == 'rejoin' || data.code == 'reCon') )
+				{
+					return; // 메세지 출력하지 않음
+				}
+								
+				if( data.name == 'MiMO' ) // 서버메세지 
+				{		
+					var output = '<li><p><span class="name">[' + data.name +']</span> ' + data.message + ' <small>(' + data.date + ')</small></p></li>';
+					$( output ).appendTo('#content');
+					$('#content').scrollTop($('#content')[0].scrollHeight);	
+				}
+				else
+				{
+					// 대화
+					
+					if( data.name == '<%= name %>' ) // 나의 멘트
+					{
+						var output = '<li align="right"><div class="time">' + data.date + '</div>&nbsp;<p><img src=' + data.message + ' width="130px;" /></p></li>';
+						$( output ).appendTo('#content');
+						$('#content').scrollTop($('#content')[0].scrollHeight);	
+					}
+					else // 상대멘트
+					{
+						var output = '<li><p><span class="name">' + data.name +'</span> <img src=' + data.message + ' width="130px;" /></p>&nbsp;<div class="time">' + data.date + '</div>&nbsp;</li>';
+						$( output ).appendTo('#content');
+						$('#content').scrollTop($('#content')[0].scrollHeight);	
+					}
+				}		
+			});
+			
+			
+			
 			
 			socket.on('connect_error', function(data){				
 				if ( data == 'timeout' )
@@ -204,7 +234,8 @@
 			});
 			
 						
-			// 메세지 전송
+			/* 메세지 전송
+			====================================*/
 			$('#button').click(function(){
 				
 				if( !$("#msg").val() || $('#msg').val().replace(/\s/g,"").length == 0 )
@@ -224,13 +255,32 @@
 					id : uid,
 					name : name,
 					message : msg,
-					date : prtDate
+					date : prtDate,
+					code : 'message'
 				}); //서버측 'message' 이벤트를 호출한다. 이때 msg 전달
 				
 				var msg = $('#msg').val('').focus(); //메세지 내용 초기화
 				
 				autosize.update($('textarea'));
 			});
+			
+			
+			$("#emot").click(function(e) {
+            	var uid = $('#uid').val();
+				var name = $('#name').val();
+				var msg = '/images/smile.png';
+				
+				//서버측 'message' 이벤트를 호출한다. 이때 msg 전달
+				var prtDate = getNowTime();
+				socket.emit('emot', {
+					id : uid,
+					name : name,
+					message : msg,
+					date : prtDate,
+					code : 'emot'
+				}); //서버측 'message' 이벤트를 호출한다. 이때 msg 전달				
+            });
+			
 			
 			// 퇴장 
 			$('#button2, #back-btn').click(function(){	
@@ -291,7 +341,8 @@
             <tr>
                 <!--<td><input type="text" id="msg" autofocus style="width:100%" /></td>-->
                 <td><textarea id="msg" autofocus style="width:100%; font-size: 17px; max-height:60px; *border:1px solid #000; margin:0;" rows="1"></textarea></td>
-                <td width="57"><input type="button" id="button" value="메세지" class="button-sm" />
+                <td width="35" align="center"><i id="emot" class="fonti um-smile-o um-2x" style="color:#E8684B"></i></td>
+                <td width="57"><input type="button" id="button" value="보내기" class="button-sm" /></td>
             </tr>
         </table>
     </div>
