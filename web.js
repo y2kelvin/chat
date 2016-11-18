@@ -434,6 +434,7 @@ function publicMessage(code, data)
 	};
 					
 	io.sockets.in( room ).emit('message', {
+		code : code,
 		name : 'MiMO',
 		message : message,
 		date : prtDate,
