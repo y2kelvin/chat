@@ -202,6 +202,8 @@ io.sockets.on( 'connection', function(socket){
 					num : item.num
 				});
 			 });
+			 
+			 publicMessage('reCon', data); // 전체 메세지
 		});
 		
 		console.log('reCon> ' +  data.name + '님 재접속 ' + data.num); 			
@@ -411,6 +413,11 @@ function publicMessage(code, data)
 			message = data.name+'님이 ' + room+'방에 재입장하셨습니다. ';			
 			
 			break;
+		
+		case 'reCon' :			
+			message = data.name+'님이 ' + room+'방에 재입장하셨습니다. ';			
+			
+			break;	
 			
 		case 'notice' :
 			message = data.message;			
