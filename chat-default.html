@@ -30,6 +30,12 @@
 			//return y.toString().substring(2,4) + '/' + mon + '/' + date +' ' + h + ':' + m + ':' + s;
 			return mon + '/' + date +' ' + h + ':' + m ;
 		}
+		
+		function nl2br (str, is_xhtml) {   
+			var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';   
+			return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+		}
+
 	
 		var socket;
 		var protocol = 'join';
@@ -118,13 +124,13 @@
 					
 					if( data.name == '<%= name %>' ) // 나의 멘트
 					{
-						var output = '<li align="right"><div class="time">' + data.date + '</div>&nbsp;<p class="talk me"><span class="name">[' + data.name +']</span> ' + data.message + '</p></li>';
+						var output = '<li align="right"><div class="time">' + data.date + '</div>&nbsp;<p class="talk me"><span class="name">[' + data.name +']</span> ' + nl2br(data.message, false) + '</p></li>';
 						$( output ).appendTo('#content');
 						$('#content').scrollTop($('#content')[0].scrollHeight);	
 					}
 					else // 상대멘트
 					{
-						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' + data.message + '</p>&nbsp;<div class="time">' + data.date + '</div>&nbsp;</li>';
+						var output = '<li><p class="talk"><span class="name">' + data.name +'</span> ' +  nl2br(data.message, false) + '</p>&nbsp;<div class="time">' + data.date + '</div>&nbsp;</li>';
 						$( output ).appendTo('#content');
 						$('#content').scrollTop($('#content')[0].scrollHeight);	
 					}
