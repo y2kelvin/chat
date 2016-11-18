@@ -35,8 +35,8 @@ app.get( '/:code/:id/:name' , function(request, response) {
 	var name = request.params.name;   	
 	//console.log('express get room: '+room+' userId: ' + userId + ' name: '+ name );		
 	
-	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-ui-inde.html', 'utf-8', function(error, data){ // cafe24
-	//fs.readFile( './chat-ui-inde.html', 'utf-8', function(error, data){		
+	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-default.html', 'utf-8', function(error, data){ // cafe24
+	//fs.readFile( './chat-default.html', 'utf-8', function(error, data){		
 		response.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		response.end( ejs.render(data, {
 			room: room,
