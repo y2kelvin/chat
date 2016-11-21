@@ -59,7 +59,8 @@ exports.dbStart = function ()
 // Connect 연결 
 var dbconnect = function ()
 {	
-	connection = mysql.createConnection(cafe24_config);
+	/* 주소수정3 */
+	connection = mysql.createConnection(db_config);
 	
 	connection.connect(function(err) { 
 		if(err) { // or restarting (takes a while sometimes).

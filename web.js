@@ -38,10 +38,11 @@ app.get( '/:code/:id/:name' , function(request, response) {
 	var room = request.params.code;           
 	var userId = request.params.id;           
 	var name = request.params.name;   	
-	//console.log('express get room: '+room+' userId: ' + userId + ' name: '+ name );		
 	
-	fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-default.html', 'utf-8', function(error, data){ // cafe24
-	//fs.readFile( './chat-default.html', 'utf-8', function(error, data){		
+	
+	/* 주소수정1 */	
+	//fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-default.html', 'utf-8', function(error, data){ // cafe24
+	fs.readFile( './chat-default.html', 'utf-8', function(error, data){		
 		response.writeHead( 200, { 'Content-Type' : 'text/html' } );
 		response.end( ejs.render(data, {
 			room: room,
@@ -64,8 +65,9 @@ app.get( '/:id/:pw' , function(request, response) {
 	
 	if( userId == 'admin' && pw == 'okokchat' )
 	{
-		fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-admin.html', 'utf-8', function(error, data){ // cafe24
-		//fs.readFile( './chat-admin.html', 'utf-8', function(error, data){									
+		/* 주소수정2 */
+		//fs.readFile( '/home/hosting_users/mimochat/apps/mimochat_mimochat/chat-admin.html', 'utf-8', function(error, data){ // cafe24
+		fs.readFile( './chat-admin.html', 'utf-8', function(error, data){									
 			
 			console.log('admin 접속'); 			
 			
